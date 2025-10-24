@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untukmu, Sayang 🌹</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Font: Itim -->
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-flap: #d46a84;
+            --color-env: #f8e1e9;
+            --color-heart: #ff6f91;
+        }
+        * { font-family: 'Itim', cursive; }
+
+        /* Custom Envelope & Heart CSS (minimal for core effect) */
+        .envelope-container { perspective: 1000px; }
+        .envelope {
+            position: relative; width: 160px; height: 110px; border-radius: 6px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); background-color: var(--color-flap);
+        }
+        .flap {
+            position: absolute; width: 0; height: 0; z-index: 3;
+            border-left: 80px solid transparent; border-right: 80px solid transparent;
+            border-top: 55px solid var(--color-flap); transform-origin: top;
+            pointer-events: none; transition: transform 0.4s ease, z-index 0.6s;
+        }
+        .open .flap { transform: rotateX(180deg); z-index: 1; }
+        .close .flap { transform: rotateX(0deg); z-index: 5; }
+
+        .pocket {
+            border-left: 80px solid var(--color-env); border-right: 80px solid var(--color-env);
+            border-bottom: 55px solid #D4AFB8; border-top: 55px solid transparent;
+            border-bottom-left-radius: 6px; border-bottom-right-radius: 6px;
+        }
+
+        .letter {
+            position: absolute; background-color: #e0d9dd; width: 90%; height: 90%;
+            top: 5%; left: 5%; border-radius: 6px; padding: 15px; box-sizing: border-box;
+            box-shadow: 0 2px 26px rgba(0,0,0,0.08); transition: transform 0.4s ease;
+            z-index: 1;
+        }
+        .open .letter { transform: translateY(-40px) rotate(-2.5deg); z-index: 2; transition-delay: 0.2s; }
+        .close .letter { transform: translateY(0); z-index: 1; transition-delay: 0s; }
+
+        .heart {
+            position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 25px; height: 25px; pointer-events: none; animation: slideUp 4s linear infinite;
+            opacity: 0; transition: opacity 0.5s;
+        }
+        .heart::before, .heart::after {
+            content: ""; position: absolute; top: 0; width: 12.5px; height: 20px;
+            background: var(--color-heart); border-radius: 12.5px 12.5px 0 0;
+            transform: rotate(-45deg); transform-origin: 0 100%;
+        }
+        .heart::after { left: 0; transform: rotate(45deg); transform-origin: 100% 100%; }
+        .open .heart { animation-name: slideUp, sideSway; opacity: 1; }
+
+        @keyframes slideUp { 0% { bottom: 0; } 100% { bottom: 300px; opacity: 0; } }
+        @keyframes sideSway { 0% { margin-left: -5px; } 50% { margin-left: 5px; } 100% { margin-left: -5px; } }
+
+        /* Game Card Styles (Simplified) */
+        .card-inner { transition: transform 0.6s; transform-style: preserve-3d; }
+        .card.flipped .card-inner { transform: rotateY(180deg); }
+        .card-front, .card-back { backface-visibility: hidden; }
+        .card-back { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center p-4 overflow-x-hidden">
+
+    <!-- Container Utama -->
+    <div id="app" class="w-full max-w-sm md:max-w-md">
+
+        <!-- Halaman 1: Mulai (hal1) -->
+        <div id="hal1" class="kotak bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-white/20 text-center transition-all duration-700 scale-100">
+            <img src="rafila2.jpeg" class="mx-auto mb-4 rounded-full border-4 border-white shadow-lg">
+            <p class="text-xl font-bold mb-4">Halooo sayang!</p>
+            <button onclick="pindahHal(2)" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300">Mulai</button>
+        </div>
+
+        <!-- Halaman 2: Envelope (hal2) -->
+        <div id="hal2" class="hidden flex flex-col items-center justify-center h-[300px]">
+            <div class="envelope-container mb-10">
+                <div id="envelope" class="envelope close">
+                    <div class="flap"></div>
+                    <div class="pocket"></div>
+                    <div class="letter flex items-center justify-center">
+                        <p class="text-lg text-red-700 font-semibold">halo rafila sayang</p>
+                    </div>
+                </div>
+            </div>
+            <!-- PERBAIKAN: Menambahkan pointer-events-none agar lapisan hati tidak menghalangi klik tombol di bawahnya. -->
+            <div id="hearts-container" class="absolute inset-0 pointer-events-none">
+                <div class="heart h-1/2 left-1/4"></div>
+                <div class="heart h-1/2 left-3/4 animate-delay-200"></div>
+            </div>
+            <!-- Menambahkan z-10 untuk memastikan tombol di atas elemen lain di flex container -->
+            <button onclick="bukaEnvelope()" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300 relative z-10">Buka</button>
+        </div>
+
+        <!-- Halaman 3: Input Tahun Lahir (hal3) -->
+        <div id="hal3" class="kotak hidden bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-white/20 text-center">
+            <img src="rafila.jpeg" class="mx-auto mb-4 rounded-full border-4 border-white shadow-lg">
+            <label for="tahunLahir" class="text-xl font-bold block mb-4">Tahun Lahir Kamu? 🤔</label>
+            <input type="range" id="tahunLahir" min="1990" max="2020" value="2000" class="w-4/5 h-2 bg-pink-600 rounded-lg appearance-none cursor-pointer">
+            <output id="tahunLahirOutput" class="text-2xl font-extrabold text-pink-500 block mb-6">2000</output>
+            <button onclick="pindahHal(4)" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-lg transition duration-300">Lanjutkan</button>
+        </div>
+
+        <!-- Halaman 4: Memory Game (hal4) -->
+        <div id="hal4" class="kotak hidden bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-white/20 text-center">
+            <h2 class="text-xl font-bold mb-2">Permainan Ingatan ✨</h2>
+            <p class="mb-4">Cocokkan 6 pasang kartu ini yaa sayang.</p>
+            <div id="papanGame" class="grid grid-cols-4 gap-2 md:gap-3 mx-auto max-w-xs md:max-w-md">
+                <!-- Kartu akan dimasukkan di sini oleh JS -->
+            </div>
+            <p id="statusGame" class="mt-4 font-semibold text-pink-400"></p>
+            <button id="lanjut" onclick="pindahHal(5)" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-lg mt-4 hidden">Lihat Pesan Cinta!</button>
+            <button id="ulang" onclick="mulaiHal4()" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-full shadow-lg mt-4 hidden">Coba Lagi!</button>
+        </div>
+
+        <!-- Halaman 5: Pesan Akhir (hal5) -->
+        <div id="hal5" class="kotak hidden bg-white/10 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-white/20 text-center">
+            <canvas id="fireworks-canvas" class="absolute inset-0 z-0 rounded-3xl"></canvas>
+            <div class="relative z-10">
+                <img src="rafila3.jpeg" class="mx-auto mb-4 rounded-full border-4 border-white shadow-lg">
+                <div class="text-left overflow-y-auto h-40 custom-scrollbar p-2">
+                    <p id="teksCinta" class="text-lg font-bold mb-2"></p>
+                    <p id="pesanAkhir" class="text-base mb-2"></p>
+                    <p id="teksLucu" class="text-base italic"></p>
+                </div>
+            </div>
+            <button onclick="balasWa()" class="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 px-6 rounded-full shadow-lg mt-6 relative z-10">Balas Sekarang 💌</button>
+        </div>
+
+    </div>
+
+    <script>
+        // --- Setup Awal ---
+        let currentHal = 1;
+        const app = document.getElementById('app');
+        const hal1 = document.getElementById('hal1');
+        const hal2 = document.getElementById('hal2');
+        const hal3 = document.getElementById('hal3');
+        const hal4 = document.getElementById('hal4');
+        const hal5 = document.getElementById('hal5');
+        const tahunLahirInput = document.getElementById('tahunLahir');
+        const tahunLahirOutput = document.getElementById('tahunLahirOutput');
+        
+        // Memastikan tampilan awal di hal1
+        hal2.classList.add('hidden');
+        hal3.classList.add('hidden');
+        hal4.classList.add('hidden');
+        hal5.classList.add('hidden');
+
+        // Handler Range Input
+        tahunLahirInput.addEventListener('input', () => {
+            tahunLahirOutput.textContent = tahunLahirInput.value;
+        });
+
+        // --- Fungsi Navigasi Halaman ---
+        function pindahHal(targetHal) {
+            const currentEl = document.getElementById(`hal${currentHal}`);
+            const targetEl = document.getElementById(`hal${targetHal}`);
+
+            if (!currentEl || !targetEl) return;
+
+            // Transisi keluar
+            currentEl.style.transform = 'scale(0.8)';
+            currentEl.style.opacity = '0';
+            
+            setTimeout(() => {
+                currentEl.classList.add('hidden');
+                currentEl.style.transform = 'scale(1)'; // Reset untuk transisi kembali
+                currentEl.style.opacity = '1';
+
+                // Transisi masuk
+                targetEl.classList.remove('hidden');
+                targetEl.style.transform = 'scale(0.8)';
+                targetEl.style.opacity = '0';
+                
+                setTimeout(() => {
+                    targetEl.style.transform = 'scale(1)';
+                    targetEl.style.opacity = '1';
+                }, 50);
+
+                currentHal = targetHal;
+                
+                if (targetHal === 4) mulaiHal4();
+                if (targetHal === 5) mulaiHal5();
+
+            }, 500);
+        }
+
+        // --- Halaman 2: Envelope ---
+        function bukaEnvelope() {
+            const envelope = document.getElementById('envelope');
+            envelope.classList.remove('close');
+            envelope.classList.add('open');
+            document.getElementById('hearts-container').classList.add('open'); // Memicu animasi hati
+
+            // Hapus tombol Buka
+            document.querySelector('#hal2 button').classList.add('hidden');
+
+            setTimeout(() => {
+                // Envelope menghilang setelah terbuka
+                envelope.style.transform = 'scale(0.5)';
+                envelope.style.opacity = '0';
+                
+                setTimeout(() => {
+                    pindahHal(3);
+                }, 500);
+
+            }, 1200);
+        }
+
+        // --- Halaman 4: Memory Game Logic (Sederhana) ---
+        const kartuData = [
+            { id: 1, icon: '💖' }, { id: 2, icon: '🌹' }, { id: 3, icon: '💐' },
+            { id: 4, icon: '❤️' }, { id: 5, icon: '🎉' }, { id: 6, icon: '🎁' }
+        ];
+        let kartuGame = [...kartuData, ...kartuData]; // Duplikat kartu
+        let kartuDibuka = [];
+        let pasanganCocok = 0;
+        let gameJalan = false;
+
+        function acakKartu(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function mulaiHal4() {
+            kartuDibuka = [];
+            pasanganCocok = 0;
+            gameJalan = true;
+            kartuGame = acakKartu([...kartuData, ...kartuData]);
+            
+            document.getElementById('papanGame').innerHTML = '';
+            document.getElementById('statusGame').innerText = '0/6 pasangan cocok.';
+            document.getElementById('lanjut').classList.add('hidden');
+            document.getElementById('ulang').classList.add('hidden');
+
+            const papanGame = document.getElementById('papanGame');
+            kartuGame.forEach((card, index) => {
+                const elemenKartu = document.createElement('div');
+                elemenKartu.className = 'card h-16 w-full rounded-xl bg-gray-500/30 cursor-pointer';
+                elemenKartu.dataset.id = card.id;
+                elemenKartu.dataset.index = index;
+
+                elemenKartu.innerHTML = `
+                    <div class="card-inner w-full h-full relative">
+                        <div class="card-front absolute w-full h-full flex items-center justify-center rounded-xl bg-pink-500 hover:bg-pink-400 text-2xl font-bold transition duration-200">?</div>
+                        <div class="card-back absolute w-full h-full flex items-center justify-center rounded-xl bg-white text-3xl text-pink-600 font-bold">${card.icon}</div>
+                    </div>
+                `;
+                elemenKartu.addEventListener('click', () => balikKartu(elemenKartu, card));
+                papanGame.appendChild(elemenKartu);
+            });
+        }
+
+        function balikKartu(elemenKartu, card) {
+            if (!gameJalan || kartuDibuka.length >= 2 || elemenKartu.classList.contains('flipped')) return;
+            
+            elemenKartu.classList.add('flipped');
+            kartuDibuka.push({ elemen: elemenKartu, id: card.id, index: elemenKartu.dataset.index });
+
+            if (kartuDibuka.length === 2) {
+                const [kartu1, kartu2] = kartuDibuka;
+                gameJalan = false;
+
+                if (kartu1.id === kartu2.id && kartu1.index !== kartu2.index) {
+                    // Cocok
+                    pasanganCocok++;
+                    document.getElementById('statusGame').innerText = `${pasanganCocok}/6 pasangan cocok.`;
+                    
+                    // Menonaktifkan klik pada kartu yang cocok
+                    kartu1.elemen.removeEventListener('click', () => balikKartu(kartu1.elemen, kartuData.find(c => c.id === kartu1.id)));
+                    kartu2.elemen.removeEventListener('click', () => balikKartu(kartu2.elemen, kartuData.find(c => c.id === kartu2.id)));
+                    
+                    kartuDibuka = [];
+                    gameJalan = true;
+
+                    if (pasanganCocok === 6) selesaiGame(true);
+
+                } else {
+                    // Tidak Cocok
+                    setTimeout(() => {
+                        kartu1.elemen.classList.remove('flipped');
+                        kartu2.elemen.classList.remove('flipped');
+                        kartuDibuka = [];
+                        gameJalan = true;
+                    }, 800);
+                }
+            }
+        }
+
+        function selesaiGame(sukses) {
+            gameJalan = false;
+            const status = document.getElementById('statusGame');
+            if (sukses) {
+                status.innerHTML = 'Selamat! Semua kartu cocok. Momen indah kita tersimpan rapi! 💖';
+                document.getElementById('lanjut').classList.remove('hidden');
+            } else {
+                status.innerText = 'Coba lagi ya! Fokus pada momen kita. 😉';
+                document.getElementById('ulang').classList.remove('hidden');
+            }
+        }
+
+        // --- Halaman 5: Pesan Akhir dan Animasi Ketik ---
+        function typewriter(elementId, text, speed) {
+            let i = 0;
+            const element = document.getElementById(elementId);
+            element.innerHTML = ''; // Kosongkan
+            return new Promise(resolve => {
+                function type() {
+                    if (i < text.length) {
+                        element.innerHTML += text.charAt(i);
+                        i++;
+                        setTimeout(type, speed);
+                    } else {
+                        resolve();
+                    }
+                }
+                type();
+            });
+        }
+
+        async function mulaiHal5() {
+            const usiaKamu = new Date().getFullYear() - parseInt(tahunLahirInput.value);
+            const speedText = 40; 
+            
+            const txtDoa = `Selamat Ulang Tahun ke-${usiaKamu}🎉🎂`;
+            const txtPesanAkhir = "ehhh ada yg makin tuwaaa, siapaa yaaa? hbd sayanggggku rafilaaa. Semoga di usia yang semakin tuwa ini, kamu selalu dikelilingi kebahagiaan, kesehatan yaa sayanggg dan semoga cita-cita kamu bisa terwujud hehe.";
+            const txtLucu = "Dan juga jan pernah bosen yaa sama aku makasi udah sesayang itu sama cwok yg belum bisa apa apa ini";
+
+            await typewriter('teksCinta', txtDoa, speedText);
+            await typewriter('pesanAkhir', txtPesanAkhir, speedText);
+            await typewriter('teksLucu', txtLucu, speedText);
+            
+            // Setelah semua selesai
+            setTimeout(() => { mulaiKembangApi('fireworks-canvas'); }, 100);
+        }
+
+        // --- Animasi Kembang Api (Sederhana) ---
+        function mulaiKembangApi(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            const ctx = canvas.getContext('2d');
+            canvas.width = hal5.clientWidth;
+            canvas.height = hal5.clientHeight;
+            
+            const fireworks = [];
+            const colors = ['#ff6f91', '#ffd1dc', '#ffffff', '#f87171'];
+        
+            function createFirework(x, y) {
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const particles = [];
+                for (let i = 0; i < 20; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 4 + 1;
+                    particles.push({
+                        x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+                        radius: Math.random() * 2 + 1, color: color, life: 60, alpha: 1
+                    });
+                }
+                fireworks.push({ particles });
+            }
+        
+            function drawFireworks() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                fireworks.forEach((firework, index) => {
+                    firework.particles.forEach(particle => {
+                        ctx.beginPath();
+                        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                        ctx.fillStyle = particle.color;
+                        ctx.globalAlpha = particle.alpha;
+                        ctx.fill();
+        
+                        particle.x += particle.vx;
+                        particle.y += particle.vy;
+                        particle.vy += 0.05;
+                        particle.alpha -= 0.02;
+                        particle.life--;
+                    });
+        
+                    firework.particles = firework.particles.filter(p => p.life > 0);
+                    if (firework.particles.length === 0) {
+                        fireworks.splice(index, 1);
+                    }
+                });
+        
+                if (Math.random() < 0.05) {
+                    createFirework(
+                        Math.random() * canvas.width * 0.8 + canvas.width * 0.1, 
+                        Math.random() * canvas.height * 0.5 + canvas.height * 0.1
+                    );
+                }
+                requestAnimationFrame(drawFireworks);
+            }
+            drawFireworks();
+        }
+
+        // --- Share ke WhatsApp ---
+        function balasWa() {
+            const text = "Sayangku, aku udah liat pesan dari kamu! Aku sayang kamu banget! 💖";
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        // Panggil inisialisasi game saat halaman 4 siap
+        window.onload = () => {
+             // Inisialisasi tampilan input tahun lahir
+             document.getElementById('tahunLahirOutput').textContent = tahunLahirInput.value;
+        };
+
+    </script>
+</body>
+</html>
